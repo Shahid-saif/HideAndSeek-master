@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 069220557d160a9a487347d4fc90093b, type: 3}
+  m_Name: Palm Tree
+  m_EditorClassIdentifier: 
+  name: PalmTree
+  itemType: 0
+  animationId: 1
+  timeToLoot: 2
+  regenratable: 0
+  collectables:
+  - item: {fileID: 11400000, guid: cf0835a94563c3c2a829c2bf3145bca7, type: 2}
+    count: 3
+  - item: {fileID: 11400000, guid: 7e6f264e908be171c9655221f4dbc516, type: 2}
+    count: 1
