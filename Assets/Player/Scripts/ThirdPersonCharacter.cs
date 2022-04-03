@@ -11,6 +11,7 @@ public class ThirdPersonCharacter : MonoBehaviour
     [SerializeField] float m_MovingTurnSpeed = 360;
     [SerializeField] float m_StationaryTurnSpeed = 180;
     [SerializeField] float m_JumpPower = 12f;
+    [SerializeField] float m_WallJumpPower = 12f;
     [Range(1f, 16f)][SerializeField] float m_GravityMultiplier = 2f;
     [SerializeField] float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
     [SerializeField] float m_MoveSpeedMultiplier = 1f;
@@ -34,11 +35,15 @@ public class ThirdPersonCharacter : MonoBehaviour
 
 
     // debug
+    [SerializeField] float mapBottom = -4;
+    [SerializeField] float fallingPenalty = 5;
     public static GameObject player;
     private Transform cam;
     public float h, v;
     Vector3 newVelocity;
     PhotonView view;
+    [SerializeField] bool wallJumping;
+    float wallJumpTimer; 
 
 
     void Start()
@@ -185,7 +190,7 @@ public class ThirdPersonCharacter : MonoBehaviour
     void HandleGroundedMovement(bool crouch, bool jump)
     {
         // check whether conditions are right to allow a jump:
-        if (jump && !crouch && m_IsGrounded)
+        if (jump && !crouch && m_IsGrounded && m_Rigidbody.drag > 0)
         {
             // jump!
             m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower, m_Rigidbody.velocity.z);
@@ -203,28 +208,55 @@ public class ThirdPersonCharacter : MonoBehaviour
     }
     private void Update()
     {
-        h = Input.GetAxisRaw("Horizontal");
-        v = Input.GetAxisRaw("Vertical");
-        var camUp = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
-        var camRight = Quaternion.Euler(0, 90, 0) * camUp;
-  
+        
+        if (view.IsMine)
+        {     ReturnToMap();
+            m_GroundCheckDistance = m_Rigidbody.velocity.y <= 0 ? m_OrigGroundCheckDistance : 0.01f;
 
-        newVelocity = ((camUp * v) + (camRight * h)).normalized * m_MoveSpeedMultiplier;
+            if (wallJumping && !m_IsGrounded)
+            {
+                m_Rigidbody.drag = 0;
+            }
+            else
+            {
 
-        if (Time.deltaTime > 0 && view.IsMine)
-        {
-            Vector3 v = newVelocity;
+                m_Rigidbody.drag = 5;
+            }
+            if(Input.GetKeyDown(KeyCode.LeftShift)) m_Animator.SetTrigger("Roll");
 
-            // preserve the existing y part of the current velocity.
-            v.y = m_Rigidbody.velocity.y;
-            m_Rigidbody.velocity = v;
+            if(!wallJumping)
+            {
+                h = Input.GetAxisRaw("Horizontal");
+                v = Input.GetAxisRaw("Vertical");
+                var camUp = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
+                var camRight = Quaternion.Euler(0, 90, 0) * camUp;
+
+
+                newVelocity = ((camUp * v) + (camRight * h)).normalized * ((GetComponent<PlayerStatus>().isSeeker) ? m_MoveSpeedMultiplier * 1.35f : m_MoveSpeedMultiplier);
+            }
+            if (Time.deltaTime > 0 && view.IsMine && !wallJumping)
+            {
+                Vector3 v = newVelocity;
+
+                // preserve the existing y part of the current velocity.
+                v.y = m_Rigidbody.velocity.y;
+                m_Rigidbody.velocity = v;
+            }
         }
 
+    }
+    private void ReturnToMap()
+    {
+        if(transform.position.y <= mapBottom)
+        {
+            transform.position = GameRulesManager.gameRulesManager.spawnPoints[0].position;
+            GameRulesManager.gameRulesManager.score += fallingPenalty;
+        }
     }
     public void OnAnimatorMove()
     {
 
-        if (Time.deltaTime > 0 && view.IsMine)
+        if (Time.deltaTime > 0 && view.IsMine && !wallJumping)
         {
             Vector3 v = newVelocity;
 
@@ -255,6 +287,24 @@ public class ThirdPersonCharacter : MonoBehaviour
             m_IsGrounded = false;
             m_GroundNormal = Vector3.up;
             m_Animator.applyRootMotion = false;
+        }
+        
+}
+    private void OnCollisionStay(Collision collision)
+    {
+        var hit = collision.GetContact(collision.contactCount - 1);
+        if (collision.collider.tag == "Wall" && !m_IsGrounded && hit.normal.y <= .1f && Input.GetKeyDown(KeyCode.Space) && wallJumpTimer < Time.time)
+        {
+            wallJumpTimer = Time.time + .2f;
+            wallJumping = true;
+            newVelocity = Vector3.zero;
+            m_Rigidbody.velocity = Vector3.zero;
+            m_Rigidbody.AddForce((hit.normal + Vector3.up).normalized * m_WallJumpPower);
+            Debug.Log((hit.normal + Vector3.up).normalized * m_WallJumpPower);
+        }
+        else if (wallJumpTimer < Time.time)
+        {
+            wallJumping = false;
         }
     }
 }

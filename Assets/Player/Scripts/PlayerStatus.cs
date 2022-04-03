@@ -24,7 +24,7 @@ public class PlayerStatus : MonoBehaviourPun
             GetComponentInChildren<Renderer>().material.SetColor("_Color", Color.blue);
             if (gameObject.GetPhotonView().IsMine)
             {
-                if (!GameRulesManager.gameRulesManager.endRound && GameRulesManager.gameRulesManager.gameTimer > GameRulesManager.gameRulesManager.cageCooldown)
+                if (!GameRulesManager.gameRulesManager.endRound && GameRulesManager.gameRulesManager.gameTimer > GameRulesManager.gameRulesManager.cageCooldown && !GameRulesManager.gameRulesManager.cageIsUp)
                 {
                     GameRulesManager.gameRulesManager.score += Time.deltaTime;
                     GameRulesManager.gameRulesManager.timerText.text = "Score: " + ((int)GameRulesManager.gameRulesManager.score).ToString();

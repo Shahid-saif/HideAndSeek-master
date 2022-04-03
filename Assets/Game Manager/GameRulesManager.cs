@@ -58,6 +58,9 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         gameRulesManager = this;
         defaultRoundTime = (int)PhotonNetwork.MasterClient.CustomProperties["time"];
         roundTime = defaultRoundTime;
+        Hashtable hash = new Hashtable();
+        hash.Add("Ready", false);
+        PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
     }
     void Start()
     {
