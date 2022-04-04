@@ -10,6 +10,9 @@ public class PlayerStatus : MonoBehaviourPun
     public bool isTargeted;
     public GameObject sensorParent;
     Sensor sensor;
+    [SerializeField] Color seeker_color;
+    [SerializeField] Color hider_color;
+    [SerializeField] Color Target_color;
     private bool sentScore;
     void Start()
     {
@@ -21,7 +24,7 @@ public class PlayerStatus : MonoBehaviourPun
     {
         if (isSeeker)
         {
-            GetComponentInChildren<Renderer>().material.SetColor("_Color", Color.blue);
+            GetComponentInChildren<Renderer>().material.SetColor("_Color", seeker_color);
             if (gameObject.GetPhotonView().IsMine)
             {
                 if (!GameRulesManager.gameRulesManager.endRound && GameRulesManager.gameRulesManager.gameTimer > GameRulesManager.gameRulesManager.cageCooldown && !GameRulesManager.gameRulesManager.cageIsUp)
@@ -35,11 +38,11 @@ public class PlayerStatus : MonoBehaviourPun
         }
         else if (isTargeted)
         {
-            GetComponentInChildren<Renderer>().material.SetColor("_Color", Color.red);
+            GetComponentInChildren<Renderer>().material.SetColor("_Color", Target_color);
         }
         else
         {
-            GetComponentInChildren<Renderer>().material.SetColor("_Color", Color.gray);
+            GetComponentInChildren<Renderer>().material.SetColor("_Color", hider_color);
         }
     }
 }

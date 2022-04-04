@@ -674,7 +674,7 @@ MonoBehaviour:
     m_Value: 0
   exposure:
     m_OverrideState: 1
-    m_Value: 9.5
+    m_Value: 7
   multiplier:
     m_OverrideState: 0
     m_Value: 1
@@ -791,16 +791,16 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 5
+    m_Value: 7
     min: 0
   intensity:
     m_OverrideState: 1
-    m_Value: 0.1
+    m_Value: 0.02
     min: 0
     max: 1
   scatter:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0.706
     min: 0
     max: 1
   tint:

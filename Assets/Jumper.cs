@@ -14,7 +14,7 @@ public class Jumper : MonoBehaviour
         {
             Rigidbody rb = other.GetComponentInChildren<Rigidbody>();
             Animator animator = other.GetComponentInChildren<Animator>();
-            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Airborne"))
+          
             {
                 rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
                 rb.AddForce(0, jumpPower, 0);

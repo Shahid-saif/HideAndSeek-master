@@ -45,7 +45,8 @@ public class ThirdPersonCharacter : MonoBehaviour
     [SerializeField] bool wallJumping;
     private bool canWalljump;
     Vector3 wallJumpDirection;
-    float wallJumpTimer; 
+    float wallJumpTimer;
+    [SerializeField] float vy;
 
 
     void Start()
@@ -211,7 +212,7 @@ public class ThirdPersonCharacter : MonoBehaviour
     }
     private void Update()
     {
-        
+        vy = m_Rigidbody.velocity.y;
         if (view.IsMine)
         {     
             m_GroundCheckDistance = m_Rigidbody.velocity.y <= 0 ? m_OrigGroundCheckDistance : 0.01f;
