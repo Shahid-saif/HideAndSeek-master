@@ -241,6 +241,15 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
             }
         }
     }
+
+    public void SetFallingPlayerToSeeker(int id)
+    {
+        PhotonNetwork.RaiseEvent(UPDATE_SEEKER_EVENT, new object[] { id }, RaiseEventOptions.Default, SendOptions.SendReliable);
+
+        UpdateSeeker(id);
+    }
+
+
     public void UpdateSeeker(int id)
     {
         foreach (var player in GameObject.FindGameObjectsWithTag("Player"))

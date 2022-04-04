@@ -43,6 +43,8 @@ public class ThirdPersonCharacter : MonoBehaviour
     Vector3 newVelocity;
     PhotonView view;
     [SerializeField] bool wallJumping;
+    private bool canWalljump;
+    Vector3 wallJumpDirection;
     float wallJumpTimer; 
 
 
@@ -170,6 +172,7 @@ public class ThirdPersonCharacter : MonoBehaviour
         {
             // don't use that while airborne
             m_Animator.speed = 1;
+            
         }
     }
 
@@ -210,7 +213,7 @@ public class ThirdPersonCharacter : MonoBehaviour
     {
         
         if (view.IsMine)
-        {     ReturnToMap();
+        {     
             m_GroundCheckDistance = m_Rigidbody.velocity.y <= 0 ? m_OrigGroundCheckDistance : 0.01f;
 
             if (wallJumping && !m_IsGrounded)
@@ -242,17 +245,28 @@ public class ThirdPersonCharacter : MonoBehaviour
                 v.y = m_Rigidbody.velocity.y;
                 m_Rigidbody.velocity = v;
             }
-        }
+            if (transform.position.y <= mapBottom)
+            {
+            transform.position = GameRulesManager.gameRulesManager.spawnPoints[0].position;
+            GameRulesManager.gameRulesManager.SetFallingPlayerToSeeker(view.ControllerActorNr);
+
+            }
+
+            if(canWalljump && Input.GetKeyDown(KeyCode.Space))
+            {
+            wallJumpTimer = Time.time + .2f;
+            wallJumping = true;
+            newVelocity = Vector3.zero;
+            m_Rigidbody.velocity = Vector3.zero;
+            m_Rigidbody.AddForce(wallJumpDirection *    m_WallJumpPower);
+            }
+
+
+
+            }
 
     }
-    private void ReturnToMap()
-    {
-        if(transform.position.y <= mapBottom)
-        {
-            transform.position = GameRulesManager.gameRulesManager.spawnPoints[0].position;
-            GameRulesManager.gameRulesManager.score += fallingPenalty;
-        }
-    }
+    
     public void OnAnimatorMove()
     {
 
@@ -293,14 +307,10 @@ public class ThirdPersonCharacter : MonoBehaviour
     private void OnCollisionStay(Collision collision)
     {
         var hit = collision.GetContact(collision.contactCount - 1);
-        if (collision.collider.tag == "Wall" && !m_IsGrounded && hit.normal.y <= .1f && Input.GetKeyDown(KeyCode.Space) && wallJumpTimer < Time.time)
-        {
-            wallJumpTimer = Time.time + .2f;
-            wallJumping = true;
-            newVelocity = Vector3.zero;
-            m_Rigidbody.velocity = Vector3.zero;
-            m_Rigidbody.AddForce((hit.normal + Vector3.up).normalized * m_WallJumpPower);
-            Debug.Log((hit.normal + Vector3.up).normalized * m_WallJumpPower);
+        canWalljump = (collision.collider.tag == "Wall" && !m_IsGrounded && hit.normal.y <= .1f && wallJumpTimer < Time.time);
+        if(canWalljump){
+            
+            wallJumpDirection = ((hit.normal + Vector3.up).normalized);
         }
         else if (wallJumpTimer < Time.time)
         {

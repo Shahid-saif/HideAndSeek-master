@@ -8,6 +8,7 @@ TagManager:
   - PlayersUI
   - GameManager
   - Wall
+  - Door
   layers:
   - Default
   - TransparentFX
