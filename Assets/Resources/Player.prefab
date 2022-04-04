@@ -731,14 +731,19 @@ MonoBehaviour:
   m_MovingTurnSpeed: 1000
   m_StationaryTurnSpeed: 300
   m_JumpPower: 12
+  m_WallJumpPower: 12
   m_GravityMultiplier: 3
   m_RunCycleLegOffset: 0.2
   m_MoveSpeedMultiplier: 5
   m_AnimSpeedMultiplier: 1
   m_GroundCheckDistance: 0.5
   m_IsGrounded: 0
+  mapBottom: -4
+  fallingPenalty: 5
   h: 0
   v: 0
+  wallJumping: 0
+  vy: 0
 --- !u!114 &8929838428246577508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -828,6 +833,9 @@ MonoBehaviour:
   isSeeker: 0
   isTargeted: 0
   sensorParent: {fileID: 8737340151106165729}
+  seeker_color: {r: 0, g: 0, b: 0, a: 0}
+  hider_color: {r: 0, g: 0, b: 0, a: 0}
+  Target_color: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &8929838428246577496
 MonoBehaviour:
   m_ObjectHideFlags: 0
