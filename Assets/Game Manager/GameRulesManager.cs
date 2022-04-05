@@ -52,7 +52,7 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
     private const byte RELOAD_SCENE_EVENT = 3;
     private const byte RESET_TIMER_EVENT = 4;
 
-    private void Awake()
+    private void Start()
     {
         defaultCagePosition = cage.transform.position;
         gameRulesManager = this;
@@ -62,10 +62,7 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         hash.Add("Ready", false);
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
     }
-    void Start()
-    {
 
-    }
     void Update()
     {
         if (gameStarted)
@@ -292,7 +289,7 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
             {
                 if (playerInf.id == player.Value.ActorNumber)
                 {
-                    Debug.Log((float)player.Value.CustomProperties["Score"]);
+                   // Debug.Log((float)player.Value.CustomProperties["Score"]);
                     playerInf.score = (float)player.Value.CustomProperties["Score"];
                 }
             }
