@@ -28,7 +28,7 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
     public bool isReady;
     [SerializeField] Text readyText;
     public Text roomName;
-    private int roundTime;
+    public static int roundTime;
     private bool joinedRandom;
     public ToggleGroup maps;
     public ToggleGroup roundTimeSelect;
@@ -69,10 +69,16 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
     }
     public override void OnCreatedRoom()
     {
+        PhotonNetwork.CurrentRoom.IsVisible = false;
         roomName.text = PhotonNetwork.CurrentRoom.Name;
         errorText.text = "Room created successfully";
         canvasesManager.ShowCurrentRoomCanvas();
         roomName.text = PhotonNetwork.CurrentRoom.Name;
+        for (int i = 0; i < playerListParent.childCount; i++)
+        {
+            Debug.Log(playerListParent.GetChild(i).name);
+            Destroy(playerListParent.GetChild(i).gameObject);
+        }
         Playerstats stats = Instantiate(playerListing, playerListParent).GetComponent<Playerstats>();
         stats.SetPlayerInfo(PhotonNetwork.LocalPlayer);
     }
@@ -83,6 +89,7 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
     }
     public void JoinRoom()
     {
+        errorText.text = "joining room..";
         if (joinField.text == "")
         {
             errorText.text = "Enter Room name to Join it.";
@@ -117,7 +124,6 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
         canvasesManager.ShowMainMenuCanavs();
         for (int i = 0; i < playerListParent.childCount; i++)
         {
-            Debug.Log(playerListParent.GetChild(i).name);
             Destroy(playerListParent.GetChild(i).gameObject);
         }
     }
@@ -142,7 +148,7 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
             return;
         }
         PhotonNetwork.NickName = playerField.text;
-
+        mainMenuErrorText.text = "joinig Room..";
         PhotonNetwork.JoinRandomOrCreateRoom();
     }
     public void LeaveRoom()
@@ -153,7 +159,7 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-        canvasesManager.ShowMainMenuCanavs();
+        PhotonNetwork.LoadLevel("Loading");
         base.OnDisconnected(cause);
     }
 
@@ -167,8 +173,8 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
             selectedMap = maps.GetFirstActiveToggle().name;
             roundTime = int.Parse(roundTimeSelect.GetFirstActiveToggle().name);
             hash.Add("Map", selectedMap);
-            hash.Add("time", roundTime);
         }
+
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
         PhotonNetwork.RaiseEvent(TOGGLE_READY_EVENT, new object[] { selectedMap, roundTime }, RaiseEventOptions.Default, SendOptions.SendReliable);
         readyText.text = (isReady ? "Ready" : "Not Ready");
@@ -177,6 +183,7 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
             if (player.Value != PhotonNetwork.LocalPlayer && (!(bool)player.Value.CustomProperties["Ready"])) return;
         }
         if (!isReady) return;
+        PhotonNetwork.CurrentRoom.IsOpen = false;
         PhotonNetwork.LoadLevel(selectedMap);
     }
     public override void OnEnable()
@@ -226,6 +233,7 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
             }
 
             if (!isReady) return;
+            PhotonNetwork.CurrentRoom.IsOpen = false;
             PhotonNetwork.LoadLevel(selectedMap);
         }
     }
