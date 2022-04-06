@@ -48,7 +48,7 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
     public List<Transform> spawnPoints;
     public bool gameEnded;
     public bool returnToMenuButton;
-    private int numberOfScoresSent = 0;
+    private int updateScoreInServer = 0;
 
 
 
@@ -67,11 +67,18 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         defaultCagePosition = cage.transform.position;
         gameRulesManager = this;
         defaultRoundTime = RoomsManager.roundTime;
-        roundTime = defaultRoundTime;        
+        roundTime = defaultRoundTime;
     }
 
     void Update()
     {
+        if (updateScoreInServer < Time.time && PhotonNetwork.IsMasterClient)
+        {
+            updateScoreInServer = (int)(Time.time) + 2;
+            Hashtable hash = new Hashtable();
+            hash.Add("Score", playerInfos);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(hash);
+        }
         if (gameStarted)
         {
             gameTimer = (float)PhotonNetwork.Time - startingServerTime;
@@ -104,7 +111,7 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         }
         else if (gameTimer < cageCooldown)
         {
-            timerText.text ="Round " + roundNum + " Starting in: " + ((int)(cageCooldown - gameTimer)).ToString();
+            timerText.text = "Round " + roundNum + " Starting in: " + ((int)(cageCooldown - gameTimer)).ToString();
         }
         else if (cageIsUp)
         {
@@ -116,15 +123,15 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         {
             roundTime = defaultRoundTime + cageCooldown - gameTimer;
             if (!gameEnded && roundTime >= 0)
-            timerText.text = ((int)roundTime).ToString();
+                timerText.text = ((int)roundTime).ToString();
         }
+        if (!endRound) endRound = roundTime < 0;
 
-        endRound = roundTime < 0 || seekersCount == PhotonNetwork.CurrentRoom.PlayerCount;
         cageIsUp = cage.position.y <= 5;
 
 
         if (endRound)
-        {            
+        {
             endTimer = gameTimer - defaultRoundTime - cageCooldown;
             if (endTimer > 3 && !gameEnded)
             {
@@ -132,34 +139,27 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
 
             }
 
-            else if (0 != playersToBeSeekers.Count && PhotonNetwork.LocalPlayer.IsMasterClient)
+            else if (0 != playersToBeSeekers.Count && PhotonNetwork.IsMasterClient)
             {
                 PhotonNetwork.RaiseEvent(RELOAD_SCENE_EVENT, new object[] { }, RaiseEventOptions.Default, SendOptions.SendReliable);
                 ReloadLevel();
             }
-            else if (PhotonNetwork.LocalPlayer.IsMasterClient)
+            else if (PhotonNetwork.IsMasterClient)
             {
                 PhotonNetwork.RaiseEvent(END_GAME_EVENT, new object[] { }, RaiseEventOptions.Default, SendOptions.SendReliable);
-
-                
                 EndGame();
             }
         }
-        
+
         if (returnToMenuButton)
         {
-            if ((int)PhotonNetwork.CurrentRoom.PlayerCount  <= numberOfScoresSent)
-            {
-                PrintScores();
-                scoreText.text = "Press 'Q' to quit";
-            }
             if (Input.GetKeyDown(KeyCode.Q))
             {
                 ReturnToMenu();
             }
         }
 
-       
+
     }
     public void StartGame()
     {
@@ -169,24 +169,16 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         startingSeeker = playersToBeSeekers[randomIndex];
         startingServerTime = (float)PhotonNetwork.Time;
         playersToBeSeekers.Remove(playersToBeSeekers[randomIndex]);
-        object[] data = new object[] { startingSeeker , startingServerTime };
+        object[] data = new object[] { startingSeeker, startingServerTime };
         PhotonNetwork.RaiseEvent(START_GAME_EVENT, data, RaiseEventOptions.Default, SendOptions.SendReliable);
         timerText.gameObject.SetActive(true);
 
     }
     public void SendScore(float score)
     {
-        PhotonNetwork.RaiseEvent(SEND_SCORE_EVENT, new object[] {score,PhotonNetwork.LocalPlayer.ActorNumber }, RaiseEventOptions.Default, SendOptions.SendReliable);
-        foreach (var player in playerInfos)
-        {
-            if(player.id == PhotonNetwork.LocalPlayer.ActorNumber)
-            {
-                player.score = score;
-            }
-        }
-        numberOfScoresSent++;
-
         scoreText.text = "Calculating Scores..";
+        PhotonNetwork.RaiseEvent(SEND_SCORE_EVENT, new object[] { playerInfos }, RaiseEventOptions.Default, SendOptions.SendReliable);
+        PrintScores();
     }
     private void OnEnable()
     {
@@ -199,8 +191,8 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
     private void NetworkingClient_EventReceived(EventData obj)
     {
         if (obj.Code == START_GAME_EVENT)
-        {            object[] data = (object[])obj.CustomData;
-
+        {
+            object[] data = (object[])obj.CustomData;
             if (roundNum == 0)
             {
                 foreach (var player in PhotonNetwork.CurrentRoom.Players.Values)
@@ -213,7 +205,6 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
             timerText.gameObject.SetActive(true);
             gameStarted = true;
             roundNum++;
-
         }
         if (obj.Code == RESET_TIMER_EVENT)
         {
@@ -226,23 +217,14 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
             object[] data = (object[])obj.CustomData;
             int seekerId = (int)data[0];
             UpdateSeeker(seekerId);
-
         }
         if (obj.Code == SEND_SCORE_EVENT)
         {
             object[] data = (object[])obj.CustomData;
-            float score = (float)data[0];
-            int id = (int)data[1];
-            foreach (var playerInfo in playerInfos)
-            {
-                if(playerInfo.id == id)
-                {
-                    playerInfo.score = score;
-                    numberOfScoresSent++;
-                }
-            }
+            playerInfos = (List<PlayerInfo>)data[0];
+            PrintScores();
         }
-        if(obj.Code == OPEN_DOOR_EVENT)
+        if (obj.Code == OPEN_DOOR_EVENT)
         {
             object[] data = (object[])obj.CustomData;
             linkDoor.SetTrigger("Trigger");
@@ -256,16 +238,14 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         {
             object[] data = (object[])obj.CustomData;
             ReloadLevel();
-
         }
         if (obj.Code == END_GAME_EVENT)
         {
             object[] data = (object[])obj.CustomData;
-
             EndGame();
-
         }
     }
+
     void SpawnPlayers()
     {
         int i = 0;
@@ -294,24 +274,21 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
     {
         foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
         {
-
             if (player.GetPhotonView().OwnerActorNr == id)
             {
                 player.GetComponent<PlayerStatus>().isSeeker = true;
             }
-           
-            player.GetComponent<PlayerStatus>().isTargeted = false;
         }
 
         UpdatePlayersInfos();
     }
     public void UpdatePlayersInfos()
-    {   
+    {
         playerInfos = new List<PlayerInfo>();
 
         foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
         {
-           
+
             playerInfos.Add(new PlayerInfo(player.GetPhotonView().OwnerActorNr, player.GetPhotonView().Owner.NickName, player.GetComponent<PlayerStatus>().isSeeker, 0));
         }
 
@@ -323,6 +300,8 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
     }
     void PrintScores()
     {
+        scoreText.text = "Press 'Q' to quit";
+
         playerInfos = playerInfos.OrderBy(p => p.score).ToList<PlayerInfo>();
 
         for (int i = 0; i < playerInfos.Count; i++)
@@ -335,10 +314,9 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
     }
     void EndGame()
     {
-        if (!sentScores)
+        if (!sentScores && PhotonNetwork.IsMasterClient)
         {
             SendScore(score);
-
             sentScores = true;
         }
         timerText.text = "Game Over,Press 'Q' to return to main menu";
@@ -347,9 +325,9 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
         {
 
-       
-                player.GetComponent<PlayerStatus>().isSeeker = false;
-            
+
+            player.GetComponent<PlayerStatus>().isSeeker = false;
+
 
             player.GetComponentInChildren<Sensor>().Other = new List<Collider>();
             player.GetComponent<PlayerStatus>().isTargeted = false;
@@ -361,8 +339,12 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         hash.Add("Ready", false);
         PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
         PhotonNetwork.LeaveRoom();
-        PhotonNetwork.LoadLevel("Lobby");
         returnToMenuButton = false;
+    }
+    public override void OnLeftRoom()
+    {
+        base.OnLeftRoom();
+        SceneManager.LoadScene("Lobby");
     }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
@@ -383,12 +365,7 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
             {
                 if (player.isSeeker) return;
             }
-            PhotonNetwork.RaiseEvent(UPDATE_SEEKER_EVENT, new object[] { playersToBeSeekers[0] }, RaiseEventOptions.Default, SendOptions.SendReliable);
-
-            UpdateSeeker(playersToBeSeekers[0]);
-            playersToBeSeekers.RemoveAt(0);
         }
-
     }
     void OnApplicationQuit()
     {
@@ -403,7 +380,37 @@ public class GameRulesManager : MonoBehaviourPunCallbacks, IPunObservable, IInRo
         roundTime = defaultRoundTime;
         endTimer = 0;
         endRound = false;
-        UpdateSeeker(999);
+        foreach (var player in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            player.GetComponent<PlayerStatus>().isSeeker = false;
+        }
+    }
+    void ScoreCalculator()
+    {
+        bool allSeekers = true;
+        bool allNotSeekers = true;
+        foreach (PlayerInfo player in playerInfos)
+        {
+            if (player.isSeeker)
+            {
+                player.score += Time.deltaTime;
+                allNotSeekers = false;
+            }
+            else
+            {
+                allSeekers = false;
+            }
+        }
+        if (!gameEnded)
+            gameEnded = allSeekers || allNotSeekers;
+    }
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        base.OnMasterClientSwitched(newMasterClient);
+        if (newMasterClient.IsLocal)
+        {
+            playerInfos = (List<PlayerInfo>)PhotonNetwork.CurrentRoom.CustomProperties["Score"];
+        }
     }
 }
 

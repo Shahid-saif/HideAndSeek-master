@@ -16,10 +16,10 @@ public class CanvasesManager : MonoBehaviour
 
     public void ShowCurrentRoomCanvas()
     {
+        errorText.text = "";
         mainMenuCanvas.SetActive(false);
         createRoomCanvas.SetActive(false);
         currentRoomCanvas.SetActive(true);
-//  mainCam.SetActive(false);
     }
     public void ShowCreateRoomCanvas()
     {
@@ -28,19 +28,18 @@ public class CanvasesManager : MonoBehaviour
             errorText.text = "PLayer most have a Nickname.";
             return;
         }
+        errorText.text = "";
         PhotonNetwork.NickName = playerField.text;
-
         mainMenuCanvas.SetActive(false);
         currentRoomCanvas.SetActive(false);
         createRoomCanvas.SetActive(true);
-      // mainCam.SetActive(false);
     }
 
     public void ShowMainMenuCanavs()
     {
+        errorText.text = "";
         currentRoomCanvas.SetActive(false);
         createRoomCanvas.SetActive(false);
         mainMenuCanvas.SetActive(true);
-      //  mainCam.SetActive(true);
     }
 }

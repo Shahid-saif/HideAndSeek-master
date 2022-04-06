@@ -121,6 +121,8 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
     public override void OnLeftRoom()
     {
         base.OnLeftRoom();
+        errorText.text = "";
+        mainMenuErrorText.text = "";
         canvasesManager.ShowMainMenuCanavs();
         for (int i = 0; i < playerListParent.childCount; i++)
         {
@@ -141,6 +143,8 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
     }
     public void JoinRandomRoom()
     {
+        errorText.text = "";
+        mainMenuErrorText.text = "";
         joinedRandom = true;
         if (playerField.text == "")
         {
@@ -154,7 +158,6 @@ public class RoomsManager : MonoBehaviourPunCallbacks, IPunObservable
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
-        canvasesManager.ShowMainMenuCanavs();
     }
 
     public override void OnDisconnected(DisconnectCause cause)
