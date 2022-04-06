@@ -8,15 +8,15 @@ public class ThirdPersonCharacter : MonoBehaviour
 {
 
 
-    [SerializeField] float m_MovingTurnSpeed = 360;
-    [SerializeField] float m_StationaryTurnSpeed = 180;
-    [SerializeField] float m_JumpPower = 12f;
-    [SerializeField] float m_WallJumpPower = 12f;
-    [Range(1f, 16f)][SerializeField] float m_GravityMultiplier = 2f;
-    [SerializeField] float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
-    [SerializeField] float m_MoveSpeedMultiplier = 1f;
-    [SerializeField] float m_AnimSpeedMultiplier = 1f;
-    [SerializeField] float m_GroundCheckDistance = 0.1f;
+    public float m_MovingTurnSpeed = 360;
+    public float m_StationaryTurnSpeed = 180;
+    public float m_JumpPower = 12f;
+    public float m_WallJumpPower = 12f;
+    [Range(1f, 16f)] public float m_GravityMultiplier = 2f;
+    public float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
+    public float m_MoveSpeedMultiplier = 1f;
+    public float m_AnimSpeedMultiplier = 1f;
+    public float m_GroundCheckDistance = 0.1f;
 
     Rigidbody m_Rigidbody;
     Animator m_Animator;
@@ -45,7 +45,8 @@ public class ThirdPersonCharacter : MonoBehaviour
     [SerializeField] bool wallJumping;
     private bool canWalljump;
     Vector3 wallJumpDirection;
-    float wallJumpTimer; 
+    float wallJumpTimer;
+    [SerializeField] float vy;
 
 
     void Start()
@@ -192,8 +193,8 @@ public class ThirdPersonCharacter : MonoBehaviour
 
     void HandleGroundedMovement(bool crouch, bool jump)
     {
-        // check whether conditions are right to allow a jump:
-        if (jump && !crouch && m_IsGrounded && m_Rigidbody.drag > 0)
+        //"&& m_Rigidbody.drag > 0" check whether conditions are right to allow a jump:
+        if (jump && !crouch && m_IsGrounded )
         {
             // jump!
             m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower, m_Rigidbody.velocity.z);
@@ -211,7 +212,7 @@ public class ThirdPersonCharacter : MonoBehaviour
     }
     private void Update()
     {
-        
+        vy = m_Rigidbody.velocity.y;
         if (view.IsMine)
         {     
             m_GroundCheckDistance = m_Rigidbody.velocity.y <= 0 ? m_OrigGroundCheckDistance : 0.01f;

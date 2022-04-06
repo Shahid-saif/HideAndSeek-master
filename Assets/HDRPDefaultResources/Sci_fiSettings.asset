@@ -674,18 +674,18 @@ MonoBehaviour:
     m_Value: 0
   exposure:
     m_OverrideState: 1
-    m_Value: 9.5
+    m_Value: 8
   multiplier:
     m_OverrideState: 0
     m_Value: 1
     min: 0
   upperHemisphereLuxValue:
     m_OverrideState: 0
-    m_Value: 0.091396995
+    m_Value: 0.41550463
     min: 0
   upperHemisphereLuxColor:
     m_OverrideState: 0
-    m_Value: {x: 0.03345707, y: 0.19329755, z: 0.5}
+    m_Value: {x: 0.4616884, y: 0.35544345, z: 0.5}
   desiredLuxValue:
     m_OverrideState: 0
     m_Value: 20000
@@ -701,7 +701,7 @@ MonoBehaviour:
     m_Value: 0
   hdriSky:
     m_OverrideState: 1
-    m_Value: {fileID: 8900000, guid: 72dbfaf2e11e92744a2ff15822b9079f, type: 3}
+    m_Value: {fileID: 8900000, guid: dc383fcb324f6734e9aa57fbe7fb8533, type: 2}
   enableDistortion:
     m_OverrideState: 0
     m_Value: 0
@@ -791,16 +791,16 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 5
+    m_Value: 7
     min: 0
   intensity:
     m_OverrideState: 1
-    m_Value: 0.1
+    m_Value: 0.02
     min: 0
     max: 1
   scatter:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0.706
     min: 0
     max: 1
   tint:

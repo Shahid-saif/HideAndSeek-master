@@ -23,11 +23,8 @@ public class Teleporter : MonoBehaviour
             }
             }}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+
     private void OnTriggerStay(Collider other)
     {
         if(other.tag == "Player" && teleportTimer < Time.time)

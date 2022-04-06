@@ -12,6 +12,15 @@ EditorBuildSettings:
     path: Assets/Scenes/Lobby.unity
     guid: 63f0f1153d998caa2adddfa214d70be4
   - enabled: 1
-    path: Assets/Scenes/Map (1).unity
+    path: Assets/Scenes/Map (1)_old.unity
     guid: a9ed610b09fca8550a7af86aa8253f02
+  - enabled: 1
+    path: Assets/Scenes/Map (2).unity
+    guid: 2fb4ea325b6083f458a24806b3a2a79b
+  - enabled: 1
+    path: Assets/Scenes/Map (3).unity
+    guid: a2a80e75bfd7fd6969d516ab7e8e981b
+  - enabled: 1
+    path: Assets/Scenes/Map (1).unity
+    guid: efa0cecca1ecf9f49bba704746dba085
   m_configObjects: {}

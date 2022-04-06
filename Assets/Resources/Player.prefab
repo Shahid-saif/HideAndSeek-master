@@ -679,8 +679,8 @@ Animator:
   m_Avatar: {fileID: 9000000, guid: ab49f3cef633f1d4c84f8c46ec6c0b74, type: 3}
   m_Controller: {fileID: 9100000, guid: e2cf68ff4b1ffda45a77f7307dd789b9, type: 2}
   m_CullingMode: 1
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_UpdateMode: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -728,17 +728,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce7a80d520cacc042b5fe14f373d8173, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_MovingTurnSpeed: 1000
+  m_MovingTurnSpeed: 2000
   m_StationaryTurnSpeed: 300
-  m_JumpPower: 12
+  m_JumpPower: 30
+  m_WallJumpPower: 700
   m_GravityMultiplier: 3
   m_RunCycleLegOffset: 0.2
-  m_MoveSpeedMultiplier: 5
-  m_AnimSpeedMultiplier: 1
-  m_GroundCheckDistance: 0.5
+  m_MoveSpeedMultiplier: 10
+  m_AnimSpeedMultiplier: 2
+  m_GroundCheckDistance: 1
   m_IsGrounded: 0
+  mapBottom: -4
+  fallingPenalty: 5
   h: 0
   v: 0
+  wallJumping: 0
+  vy: 0
 --- !u!114 &8929838428246577508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -828,6 +833,9 @@ MonoBehaviour:
   isSeeker: 0
   isTargeted: 0
   sensorParent: {fileID: 8737340151106165729}
+  seeker_color: {r: 1, g: 0, b: 0, a: 1}
+  hider_color: {r: 1, g: 1, b: 1, a: 1}
+  Target_color: {r: 0, g: 1, b: 1, a: 1}
 --- !u!114 &8929838428246577496
 MonoBehaviour:
   m_ObjectHideFlags: 0
