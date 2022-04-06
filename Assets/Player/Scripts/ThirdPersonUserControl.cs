@@ -37,7 +37,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         {
             if (!jump)
             {
-                jump = Input.GetKeyDown(KeyCode.Space);
+                jump = Input.GetButtonDown("Jump");
             }
         }
 

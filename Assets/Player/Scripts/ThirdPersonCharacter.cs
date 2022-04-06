@@ -48,6 +48,14 @@ public class ThirdPersonCharacter : MonoBehaviour
     float wallJumpTimer;
     [SerializeField] float vy;
 
+    [Header("Audio")]
+    [SerializeField] AudioSource AD_S;
+    [SerializeField] AudioClip JumpClip;
+    [SerializeField] AudioClip LandClip;
+    [SerializeField] AudioClip stepSound;
+
+    [SerializeField] bool LandCheck = false;
+
 
     void Start()
     {
@@ -149,6 +157,7 @@ public class ThirdPersonCharacter : MonoBehaviour
         if (!m_IsGrounded)
         {
             m_Animator.SetFloat("Jump", m_Rigidbody.velocity.y);
+           
         }
 
         // calculate which leg is behind, so as to leave that leg trailing in the jump animation
@@ -173,7 +182,7 @@ public class ThirdPersonCharacter : MonoBehaviour
         {
             // don't use that while airborne
             m_Animator.speed = 1;
-            
+
         }
     }
 
@@ -186,7 +195,7 @@ public class ThirdPersonCharacter : MonoBehaviour
             Vector3 extraGravityForce = (Physics.gravity * m_GravityMultiplier) - Physics.gravity;
             m_Rigidbody.AddForce(extraGravityForce);
 
-            m_GroundCheckDistance = m_Rigidbody.velocity.y < 0 ? m_OrigGroundCheckDistance : 0.01f;
+            m_GroundCheckDistance = m_Rigidbody.velocity.y < 0 ? m_OrigGroundCheckDistance : 0.5f;
         }
     }
 
@@ -194,13 +203,15 @@ public class ThirdPersonCharacter : MonoBehaviour
     void HandleGroundedMovement(bool crouch, bool jump)
     {
         //"&& m_Rigidbody.drag > 0" check whether conditions are right to allow a jump:
-        if (jump && !crouch && m_IsGrounded )
+        if (jump && !crouch && m_IsGrounded)
         {
             // jump!
+            LandCheck = true;
+            AD_S.PlayOneShot(JumpClip);
             m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower, m_Rigidbody.velocity.z);
             m_IsGrounded = false;
             m_Animator.applyRootMotion = false;
-            m_GroundCheckDistance = 0.1f;
+            m_GroundCheckDistance = 0.5f;
         }
     }
 
@@ -214,8 +225,8 @@ public class ThirdPersonCharacter : MonoBehaviour
     {
         vy = m_Rigidbody.velocity.y;
         if (view.IsMine)
-        {     
-            m_GroundCheckDistance = m_Rigidbody.velocity.y <= 0 ? m_OrigGroundCheckDistance : 0.01f;
+        {
+            m_GroundCheckDistance = m_Rigidbody.velocity.y <= 0 ? m_OrigGroundCheckDistance : 0.5f;
 
             if (wallJumping && !m_IsGrounded)
             {
@@ -226,9 +237,9 @@ public class ThirdPersonCharacter : MonoBehaviour
 
                 m_Rigidbody.drag = 5;
             }
-            if(Input.GetKeyDown(KeyCode.LeftShift)) m_Animator.SetTrigger("Roll");
+            if (Input.GetKeyDown(KeyCode.LeftShift)) m_Animator.SetTrigger("Roll");
 
-            if(!wallJumping)
+            if (!wallJumping)
             {
                 h = Input.GetAxisRaw("Horizontal");
                 v = Input.GetAxisRaw("Vertical");
@@ -248,26 +259,27 @@ public class ThirdPersonCharacter : MonoBehaviour
             }
             if (transform.position.y <= mapBottom)
             {
-            transform.position = GameRulesManager.gameRulesManager.spawnPoints[0].position;
-            GameRulesManager.gameRulesManager.SetFallingPlayerToSeeker(view.ControllerActorNr);
+                transform.position = GameRulesManager.gameRulesManager.spawnPoints[0].position;
+                GameRulesManager.gameRulesManager.SetFallingPlayerToSeeker(view.ControllerActorNr);
 
             }
 
-            if(canWalljump && Input.GetKeyDown(KeyCode.Space))
+            if (canWalljump && Input.GetButtonDown("Jump"))
             {
-            wallJumpTimer = Time.time + .2f;
-            wallJumping = true;
-            newVelocity = Vector3.zero;
-            m_Rigidbody.velocity = Vector3.zero;
-            m_Rigidbody.AddForce(wallJumpDirection *    m_WallJumpPower);
+                AD_S.PlayOneShot(JumpClip);
+                wallJumpTimer = Time.time + .2f;
+                wallJumping = true;
+                newVelocity = Vector3.zero;
+                m_Rigidbody.velocity = Vector3.zero;
+                m_Rigidbody.AddForce(wallJumpDirection * m_WallJumpPower);
             }
 
 
 
-            }
+        }
 
     }
-    
+
     public void OnAnimatorMove()
     {
 
@@ -295,6 +307,12 @@ public class ThirdPersonCharacter : MonoBehaviour
         {
             m_GroundNormal = hitInfo.normal;
             m_IsGrounded = true;
+            if (LandCheck)
+            {
+                AD_S.PlayOneShot(LandClip);
+                LandCheck = false;
+            }
+         
             m_Animator.applyRootMotion = true;
         }
         else
@@ -303,14 +321,14 @@ public class ThirdPersonCharacter : MonoBehaviour
             m_GroundNormal = Vector3.up;
             m_Animator.applyRootMotion = false;
         }
-        
-}
+
+    }
     private void OnCollisionStay(Collision collision)
     {
         var hit = collision.GetContact(collision.contactCount - 1);
         canWalljump = (collision.collider.tag == "Wall" && !m_IsGrounded && hit.normal.y <= .1f && wallJumpTimer < Time.time);
-        if(canWalljump){
-            
+        if (canWalljump)
+        {
             wallJumpDirection = ((hit.normal + Vector3.up).normalized);
         }
         else if (wallJumpTimer < Time.time)

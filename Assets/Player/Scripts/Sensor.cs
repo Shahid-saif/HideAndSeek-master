@@ -40,7 +40,6 @@ public class Sensor : MonoBehaviour
                             int seekerId = hit.collider.gameObject.GetPhotonView().OwnerActorNr;
                             object[] data = new object[] { seekerId };
 
-                            Debug.Log(seekerId);
                             PhotonNetwork.RaiseEvent(UPDATE_SEEKER_EVENT, data, RaiseEventOptions.Default, SendOptions.SendReliable);
                             GameRulesManager.gameRulesManager.UpdateSeeker(seekerId);
                         }

@@ -5,6 +5,7 @@ using UnityEngine;
 public class Jumper : MonoBehaviour
 {
     public float jumpPower = 150;
+    [SerializeField] AudioSource AD;
 
 
 
@@ -12,6 +13,7 @@ public class Jumper : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            AD.Play();
             Rigidbody rb = other.GetComponentInChildren<Rigidbody>();
             Animator animator = other.GetComponentInChildren<Animator>();
           

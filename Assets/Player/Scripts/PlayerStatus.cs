@@ -22,27 +22,27 @@ public class PlayerStatus : MonoBehaviourPun
 
     void Update()
     {
+        if(!GameRulesManager.gameRulesManager.endRound && !GameRulesManager.gameRulesManager.gameEnded)
+        GameRulesManager.gameRulesManager.scoreText.text = "Score: " + ((int)GameRulesManager.gameRulesManager.score).ToString();
+
         if (isSeeker)
         {
-            GetComponentInChildren<Renderer>().material.SetColor("_Color", seeker_color);
+            GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = seeker_color;
             if (gameObject.GetPhotonView().IsMine)
             {
-                if (!GameRulesManager.gameRulesManager.endRound && GameRulesManager.gameRulesManager.gameTimer > GameRulesManager.gameRulesManager.cageCooldown && !GameRulesManager.gameRulesManager.cageIsUp)
+                if (!GameRulesManager.gameRulesManager.endRound && GameRulesManager.gameRulesManager.gameTimer > GameRulesManager.gameRulesManager.cageCooldown)
                 {
                     GameRulesManager.gameRulesManager.score += Time.deltaTime;
-                    GameRulesManager.gameRulesManager.timerText.text = "Score: " + ((int)GameRulesManager.gameRulesManager.score).ToString();
                 }
-
-
             }
         }
         else if (isTargeted)
         {
-            GetComponentInChildren<Renderer>().material.SetColor("_Color", Target_color);
+            GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = Target_color;
         }
         else
         {
-            GetComponentInChildren<Renderer>().material.SetColor("_Color", hider_color);
+            GetComponentInChildren<SkinnedMeshRenderer>().materials[0].color = hider_color;
         }
     }
 }
